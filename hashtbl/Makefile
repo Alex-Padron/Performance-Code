@@ -3,8 +3,8 @@ CFLAGS := -g -Wall -std=gnu99 -gdwarf-3 -ftapir
 LDFLAGS := -lrt -lm -lcilkrts
 
 # You may add new files to the list of COMMON_SRC below
-COMMON_SRC := hashtbl.c
-COMMON_HEADERS := fasttime.h
+COMMON_SRC := # hashtbl_lin_prob.c
+COMMON_HEADERS := fasttime.h hashtbl_lin_prob.h
 TARGET := hashtbl_test
 
 ifeq ($(DEBUG),1)
