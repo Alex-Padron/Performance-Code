@@ -12,6 +12,8 @@ struct Hashtbl {
 
 struct Hashtbl* hashtbl_create(int32_t size);
 
+void hashtbl_free(struct Hashtbl* hashtbl);
+
 void hashtbl_insert(struct Hashtbl* hashtbl, int32_t key, int32_t value);
 
 // return 0 if key not in table
