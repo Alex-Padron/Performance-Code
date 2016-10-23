@@ -48,32 +48,40 @@ void swap_colors(struct rb_node* x, struct rb_node* y) {
   y->color = tmp;
 }
 
-void rotate_right(struct rb_tree* T, struct rb_node* x) {
-  struct rb_node* left = x->left;
-  x->left = x->left->right;
-  if (x->left) x->left->parent = x;
-  left->parent = x->parent;
-  if (!x->parent) {
-    T->head = left;
-  } else if (x == x->parent->left) {
-    x->parent->left = left;
+// [dir == 0] left child, [dir == 1] right child
+inline struct rb_node* get_child(struct rb_node* x, int dir) {
+  if (dir) return x->right;
+  return x->left;
+}
+
+// [dir == 0] assign left child, [dir == 1] assign right child
+inline void assign_child(struct rb_node* x, struct rb_node* child, int dir) {
+  if (dir) {
+    x->right = child;
   } else {
-    x->parent->right = left;
+    x->left = child;
   }
 }
 
-void rotate_left(struct rb_tree* T, struct rb_node* x) {
-  struct rb_node* right = x->right;
-  x->right = right->left;
-  if (x->right) x->right->parent = x;
-  right->parent = x->parent;
+// [dir == 0] rotate left, [dir == 1] rotate right
+void rotate(struct rb_tree* T, struct rb_node* x, int dir) {
+  int opp_dir = 1;
+  if (dir) opp_dir = 0;
+  struct rb_node* new_parent = get_child(x, opp_dir);
+  assign_child(x, get_child(new_parent, dir), opp_dir);
+  if (get_child(x, opp_dir)) get_child(x, opp_dir)->parent = x;
+  new_parent->parent = x->parent;
   if (!x->parent) {
-    T->head = right;
-  } else if (x == x->parent->left) {
-    x->parent->left = right;
+    T->head = new_parent;
   } else {
-    x->parent->right = right;
+    if (x == get_child(x->parent, dir)) {
+      assign_child(x->parent, new_parent, dir);
+    } else {
+      assign_child(x->parent, new_parent, opp_dir);
+    }
   }
+  assign_child(new_parent, x, dir);
+  x->parent = new_parent;
 }
 
 void rb_rebalance(struct rb_tree* T, struct rb_node* x) {
@@ -89,11 +97,11 @@ void rb_rebalance(struct rb_tree* T, struct rb_node* x) {
 	x = grandparent;
       } else {
 	if (x == parent->right) {
-	  rotate_left(T, parent);
+	  rotate(T, parent, 0);
 	  x = parent;
 	  parent = x->parent;
 	}
-	rotate_right(T, grandparent);
+	rotate(T, grandparent, 1);
 	swap_colors(parent, grandparent);
       }
     } else { // parent is right child
@@ -105,11 +113,11 @@ void rb_rebalance(struct rb_tree* T, struct rb_node* x) {
 	x = grandparent;
       } else {
 	if (x == parent->left) {
-	  rotate_right(T, parent);
+	  rotate(T, parent, 1);
 	  x = parent;
 	  parent = x->parent;
 	}
-	rotate_left(T, grandparent);
+	rotate(T, grandparent, 0);
 	swap_colors(parent, grandparent);
 	x = parent;
       }
@@ -118,21 +126,35 @@ void rb_rebalance(struct rb_tree* T, struct rb_node* x) {
   T->head->color = black;
 }
 
+int max(int a, int b) {
+  if (a > b) return a;
+  return b;
+}
+
+int rec_height(struct rb_node* x) {
+  int height = 0;
+  if (x->left) height = rec_height(x->left);
+  if (x->right) height = max(rec_height(x->right), height);
+  return 1 + height;
+}
+
+int height(struct rb_tree* T) {
+  if (T->head) return rec_height(T->head);
+  return 0;
+}
 
 void rb_insert(struct rb_tree* T, int key, int value) {
-  printf("inserting key %d and value %d into tree\n", key, value);
   if (T->head == 0) {
     T->head = malloc(sizeof(struct rb_node));
     T->head->key = key;
     T->head->value = value;
     T->head->color = black;
+    ++T->size;
     return;
   }
   struct rb_node* inserted = rb_tree_insert(T, key, value);
   if (inserted) {
-    printf("started rebalancing\n");
     rb_rebalance(T, inserted);
-    printf("finished rebalancing\n");
   } 
 }
 
@@ -153,39 +175,7 @@ int rb_find(struct rb_tree* T, int key) {
     }
   }
 }
-
-
-int max(int a, int b) {
-  if (a > b) return a;
-  return b;
-}
-
-int rec_height(struct rb_node* x) {
-  int height = 0;
-  if (x->left) height = rec_height(x->left);
-  if (x->right) height = max(rec_height(x->right), height);
-  return 1 + height;
-}
-
-int height(struct rb_tree* T) {
-  if (T->head) return rec_height(T->head);
-  printf("unable to find head of tree for height\n");
-  return 0;
-}
-
-int rec_size(struct rb_node* x) {
-  int size = 1;
-  if (x->left) size += rec_size(x->left);
-  if (x->right) size += rec_size(x->right);
-  return size;
-}
-
-int size(struct rb_tree* T) {
-  if (T->head) return rec_size(T->head);
-  printf("unable to find head of tree for size\n");
-  return 0;
-}
-
+ 
 void rb_print_tree(struct rb_tree* T) {
-  printf("TREE WITH HEIGHT %d AND SIZE %d\n", height(T), size(T));
+  printf("TREE WITH HEIGHT %d AND SIZE %d\n", height(T), T->size);
 }

@@ -22,7 +22,4 @@ int rb_find(struct rb_tree* T, int key);
 // linear time
 int height(struct rb_tree* T);
 
-//linear time
-int size(struct rb_tree* T);
-
 void rb_print_tree(struct rb_tree* T);
