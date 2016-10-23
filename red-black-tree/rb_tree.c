@@ -8,6 +8,8 @@ struct rb_node* create_node(int key, int value) {
   new_node->color = RED;
   new_node->key = key;
   new_node->value = value;
+  new_node->left = 0;
+  new_node->right = 0;
   return new_node;
 }
 
@@ -107,6 +109,12 @@ void rb_rebalance(struct rb_tree* T, struct rb_node* x) {
   T->head->color = BLACK;
 }
 
+void rec_node_delete(struct rb_node* x) {
+  if (x->right) rec_node_delete(x->right);
+  if (x->left)  rec_node_delete(x->left);
+  free(x);
+}
+
 int max(int a, int b) {
   if (a > b) return a;
   return b;
@@ -126,7 +134,14 @@ int height(struct rb_tree* T) {
 
 struct rb_tree* rb_create() {
   struct rb_tree* T = malloc(sizeof(struct rb_tree));
+  T->head = 0;
+  T->size = 0;
   return T;
+}
+
+void rb_delete(struct rb_tree* T) {
+  if (T->head) rec_node_delete(T->head);
+  free(T);
 }
 
 void rb_insert(struct rb_tree* T, int key, int value) {

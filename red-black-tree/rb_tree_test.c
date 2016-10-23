@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
   for (int i = 1; i < 100; i++) {
     test(rb_find(r, i) == (i*i));
   }
+  rb_delete(r);
   printf("...passed\n");
   return 0;
 }

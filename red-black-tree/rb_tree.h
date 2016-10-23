@@ -20,6 +20,11 @@ struct rb_tree {
 struct rb_tree* rb_create();
 
 /*
+  Free all the memory in the tree
+ */
+void rb_delete(struct rb_tree* T);
+
+/*
   Insert a key-value pair into the tree
  */
 void rb_insert(struct rb_tree* T, int key, int value);
@@ -34,3 +39,4 @@ int rb_find(struct rb_tree* T, int key);
   Get the height of the tree in linear time
  */
 int height(struct rb_tree* T);
+
